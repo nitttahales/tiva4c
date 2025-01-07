@@ -1,0 +1,8 @@
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\bin\Debug\isimyazma.exe.config
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\bin\Debug\isimyazma.exe
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\bin\Debug\isimyazma.pdb
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\obj\Debug\isimyazma.csprojResolveAssemblyReference.cache
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\obj\Debug\isimyazma.MainForm.resources
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\obj\Debug\isimyazma.csproj.GenerateResource.Cache
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\obj\Debug\isimyazma.exe
+C:\Users\BERK\OneDrive\Belgeler\SharpDevelop Projects\isimyazma\isimyazma\obj\Debug\isimyazma.pdb
