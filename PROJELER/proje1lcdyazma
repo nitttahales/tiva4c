@@ -1,0 +1,112 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/hw_types.h"
+#include "inc/hw_gpio.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/sysctl.c"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.c"
+#include "driverlib/gpio.h"
+#include "driverlib/gpio.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/tm4c123gh6pm.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.h"
+
+// LCD kontrol pinleri
+#define LCD_RS GPIO_PIN_0
+#define LCD_RW GPIO_PIN_1
+#define LCD_E  GPIO_PIN_2
+
+// LCD veri pinleri (D4-D7)
+#define LCD_DATA GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7
+
+// Komut gönderme fonksiyonu
+void LCD_Komut(uint8_t komut) {
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_RS | LCD_RW, 0x00);  // RS=0, RW=0 (Komut modu)
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_DATA, (komut & 0xF0)); // Üst nibble
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, LCD_E);  // E=1
+    SysCtlDelay(200);  // Kısa bir gecikme
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, 0x00);   // E=0
+
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_DATA, (komut << 4)); // Alt nibble
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, LCD_E);  // E=1
+    SysCtlDelay(200);
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, 0x00);   // E=0
+    SysCtlDelay(5000);  // Komut işleme süresi
+}
+
+// Veri gönderme fonksiyonu
+void LCD_Veri(uint8_t veri) {
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_RS, LCD_RS);  // RS=1 (Veri modu)
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_RW, 0x00);    // RW=0 (Yazma modu)
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_DATA, (veri & 0xF0)); // Üst nibble
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, LCD_E);  // E=1
+    SysCtlDelay(200);  // Kısa bir gecikme
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, 0x00);   // E=0
+
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_DATA, (veri << 4)); // Alt nibble
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, LCD_E);  // E=1
+    SysCtlDelay(200);
+    GPIOPinWrite(GPIO_PORTB_BASE, LCD_E, 0x00);   // E=0
+    SysCtlDelay(5000);  // Veri işleme süresi
+}
+
+// LCD'yi başlatma fonksiyonu
+void LCD_Init() {
+    SysCtlDelay(50000);
+    LCD_Komut(0x28);  // 4-bit mod, 2 satır, 5x8 font
+    LCD_Komut(0x0C);  // Ekranı aç, imleç kapalı
+    LCD_Komut(0x06);  // İmleci sağa kaydır
+    LCD_Komut(0x01);  // Ekranı temizle
+    SysCtlDelay(50000);
+}
+
+// LCD'de metni ASCII formatında yazma fonksiyonu
+void LCD_Yaz_ASCII() {
+    // İlk satır için imleci başlangıç konumuna ayarla
+    LCD_Komut(0x80);  // LCD'nin ilk satırının başlangıcı
+
+    // "WILL YOU" ASCII olarak yazdır
+    LCD_Veri(0x57);  // W
+    LCD_Veri(0x49);  // I
+    LCD_Veri(0x4C);  // L
+    LCD_Veri(0x4C);  // L
+    LCD_Veri(0x20);  // (boşluk)
+    LCD_Veri(0x59);  // Y
+    LCD_Veri(0x4F);  // O
+    LCD_Veri(0x55);  // U
+
+    // İkinci satır için imleci başlangıç konumuna ayarla
+    LCD_Komut(0xC0);  // LCD'nin ikinci satırının başlangıcı
+
+    // "MARRY ME" ASCII olarak yazdır
+    LCD_Veri(0x4D);  // M
+    LCD_Veri(0x41);  // A
+    LCD_Veri(0x52);  // R
+    LCD_Veri(0x52);  // R
+    LCD_Veri(0x59);  // Y
+    LCD_Veri(0x20);  // (boşluk)
+    LCD_Veri(0x4D);  // M
+    LCD_Veri(0x45);  // E
+}
+
+int main(void) {
+    // Sistem saatini ve GPIO'yu yapılandır
+    SysCtlClockSet(SYSCTL_SYSDIV_5 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);  // Port B'yi etkinleştir
+
+    // Port B'yi çıkış olarak ayarla
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, LCD_RS | LCD_RW | LCD_E | LCD_DATA);
+
+    // LCD'yi başlat
+    LCD_Init();
+
+    // LCD'ye metni ASCII formatında yaz
+    LCD_Yaz_ASCII();
+
+    while (1) {
+        // Döngüde kal
+    }
+}
