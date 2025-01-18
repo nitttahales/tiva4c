@@ -1,0 +1,56 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/hw_types.h"
+#include "inc/hw_gpio.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.h"
+#include "driverlib/gpio.c"
+#include "inc/hw_memmap.h"
+#include "inc/tm4c123gh6pm.h"
+
+//#define SYSCTL_RCGCGPIO_R (*((volatile uint32_t*)0x400FE608))
+#define SYSCTL_RCGCGPIO_R       (*((volatile uint32_t *)0x400FE608))
+#define GPIO_PORTF_DIR_R        (*((volatile uint32_t *)0x40025400))
+#define GPIO_PORTF_DEN_R        (*((volatile uint32_t *)0x4002551C))
+#define GPIO_PORTF_DATA_R       (*((volatile uint32_t *)0x400253FC))
+
+int main(void)
+{
+
+    SYSCTL_RCGCGPIO_R=0x20; //portf enerjilendirilir apisiz şekilde enerjilendirdik
+
+    SYSCTL_RCGCGPIO_R=SYSCTL_RCGCGPIO_R|0x01; // hem yukarıda portf enerjilendirdik hem de
+                                              // şimdi porta enerjilendirmesi ile orladık
+//----------------------------------------------------------
+    SYSCTL_RCGCGPIO_R|= 0x20; //direkt kendisi ile orladık ikisini de enerjilendirdik
+
+    GPIO_PORTF_DIR_R = 0x0e ; //
+    GPIO_PORTF_DEN_R|= 0x0e ;
+
+    GPIO_PORTF_DATA_R|=0x08;
+ //----------------------------------------------------------
+    (*((volatile uint32_t *)0x400FE608))|= 0x20; //direkt kendisi ile orladık ikisini de enerjilendirdik
+
+    (*((volatile uint32_t *)0x40025400)) = 0x0e ; //
+    (*((volatile uint32_t *)0x4002551C))|= 0x0e ;
+
+    (*((volatile uint32_t *)0x400253FC))|=0x08;
+//-----------------------------------------------------------
+
+    HWREG(0X400FE608)|=0x20; //(*((volatile uint32_t *)0x400FE608))| bu işlemi yapar
+    HWREG(0x40025400)=0x0e;
+    HWREG(0x4002551C)|=0x0e;
+    HWREG(0x400253FC)|=0x08; // aynı işlemleri hwreg ile yaptık
+//-----------------------------------------------------------
+
+    //gpiopinwrite(baseadres, gp1|gp4|gp7,value) yukarıdaki işlem öyle bir ram adresi buluyor ki sadece gp1,4,7 ler değişiyor
+    // 0x40025000 + 4*(2^1)=40025008 -- > gpiopinwrite(baseadres,gp1,2)
+    HWREG(40025008)=2; // bu demek yukarıda bulunan 40025008 adresinin sadece birinci pini yakması demek =2 de 1.pini yakma biti.
+    //hem gp1 hem gp4 hem de gp7 yakalım
+    //0x40025000 + 4*(2^1+2^4+2^7)=40025248 // sadece 1,4,7 ile alakalı burada normalde çarpım sonucu 584 geliyor ama hex karşılığı 248
+    //HWREG(40025248)=146; yaparsak sadece 1,4,7 yanar
+    //40025000den başlayarak 400253FC ye kadarki tüm adresler pin ayarlarıyla alakalı
+    //
+ return 0;
+}
